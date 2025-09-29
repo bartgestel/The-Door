@@ -219,6 +219,7 @@ MonoBehaviour:
   holdPoint: {fileID: 3529625278396793332}
   pickupRange: 3
   throwForce: 5
+  holdRotationOffset: {x: 0, y: 0.70710677, z: 0, w: -0.70710677}
 --- !u!1 &6943198814932889380
 GameObject:
   m_ObjectHideFlags: 0

@@ -22,9 +22,6 @@ public class PuzzleTile : MonoBehaviour
     
     public void SnapTo(Transform snapPoint, float heightOffset = 0f)
     {
-        if (isPlaced) return;
-        isPlaced = true;
-
         rb.linearVelocity = Vector3.zero;
         rb.angularVelocity = Vector3.zero;
         rb.isKinematic = true;

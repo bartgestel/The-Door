@@ -7,11 +7,18 @@ public class PuzzleManager : MonoBehaviour
     private int placedCount;
 
     public UnityEvent onPuzzleSolved; // koppel deur/animatie in inspector
+    
+    [Header("Door Reference")]
+    public DoorScript doorScript; // Drag your door here
 
     void Awake()
     {
         if (totalSockets == 0)
             totalSockets = FindObjectsByType<InsertSocket>(FindObjectsSortMode.None).Length;
+            
+        // Auto-find door if not assigned
+        if (doorScript == null)
+            doorScript = FindFirstObjectByType<DoorScript>();
     }
 
     public void NotifyPlaced()
@@ -22,9 +29,21 @@ public class PuzzleManager : MonoBehaviour
             Solve();
     }
 
+    public void NotifyRemoved()
+    {
+        placedCount--;
+        Debug.Log($"Tile removed: {placedCount}/{totalSockets}");
+        if (placedCount < 0) placedCount = 0; // Safety check
+    }
+
     void Solve()
     {
         Debug.Log("Puzzle solved!");
+        
+        // Open the door when puzzle is solved
+        if (doorScript != null)
+            doorScript.OpenDoor();
+            
         onPuzzleSolved?.Invoke();
         // voeg hier extra logica toe (deur openen, reward spawn, etc.)
     }

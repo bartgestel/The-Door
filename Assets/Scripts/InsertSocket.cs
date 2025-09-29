@@ -24,6 +24,8 @@ public class InsertSocket : MonoBehaviour
     // Optioneel: verwijzing naar PuzzleManager (kan automatisch gevonden worden)
     public PuzzleManager puzzleManager;
 
+    private PuzzleTile currentTile; // Track the tile in this socket
+
     void Reset()
     {
         var col = GetComponent<Collider>();
@@ -40,16 +42,25 @@ public class InsertSocket : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (occupied) return;
+        if (currentTile != null) return; // Only one tile at a time
 
         PuzzleTile tile = other.GetComponent<PuzzleTile>();
         if (tile == null || tile.isPlaced) return;
 
+        // Check if the tile is being held by the player
+        PlayerPickup playerPickup = FindFirstObjectByType<PlayerPickup>();
+        bool tileIsHeld = (playerPickup != null && playerPickup.GetHeldTile() == tile);
+
+        if (tileIsHeld)
+            playerPickup.ForceReleaseTile();
+
+        tile.SnapTo(snapPoint, tileHeightOffset);
+        currentTile = tile;
+
         if (tile.tileId == expectedID)
         {
-            // correcte plaatsing
-            tile.SnapTo(snapPoint, tileHeightOffset);
             occupied = true;
+            tile.isPlaced = true;
             onCorrectPlacement?.Invoke();
 
             if (puzzleManager != null)
@@ -60,10 +71,53 @@ public class InsertSocket : MonoBehaviour
         }
         else
         {
-            // foutieve tegel
+            occupied = false;
+            tile.isPlaced = false;
+            // Re-enable collider for incorrectly placed tiles so they can be picked up via raycast
+            var col = tile.GetComponent<Collider>();
+            if (col != null) col.enabled = true;
             if (incorrectSound != null)
                 AudioSource.PlayClipAtPoint(incorrectSound, transform.position);
-            // eventueel: duw tile iets terug, toon UI-feedback, etc.
+        }
+    }
+
+    // Called when a tile is picked up from this socket
+    public void OnTilePickedUp(PuzzleTile tile)
+    {
+        if (currentTile == tile)
+        {
+            // If this was a correctly placed tile, notify the puzzle manager
+            if (occupied && puzzleManager != null)
+            {
+                puzzleManager.NotifyRemoved();
+            }
+            
+            currentTile = null;
+            occupied = false;
+        }
+    }
+
+    private void Update()
+    {
+        if (currentTile != null && !occupied)
+        {
+            // Allow picking up the tile again if not correct
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                PlayerPickup playerPickup = FindFirstObjectByType<PlayerPickup>();
+                if (playerPickup != null && playerPickup.GetHeldTile() == null)
+                {
+                    // Only allow picking up the tile if it is the currentTile
+                    playerPickup.PickupTile(currentTile);
+                    OnTilePickedUp(currentTile);
+                    currentTile.transform.SetParent(null);
+                    currentTile.isPlaced = false;
+                    var rb = currentTile.GetComponent<Rigidbody>();
+                    if (rb) rb.isKinematic = false;
+                    var col = currentTile.GetComponent<Collider>();
+                    if (col) col.enabled = true;
+                }
+            }
         }
     }
 }

@@ -4,9 +4,7 @@ public class PlayerMovement : MonoBehaviour
 {
     [Header("Movement")] 
     public float movementSpeed;
-
     public float groundDrag;
-
     public float jumpForce;
     public float jumpCooldown;
     public float airMultiplier;
@@ -31,20 +29,32 @@ public class PlayerMovement : MonoBehaviour
     private Vector3 moveDirection;
     
     Rigidbody rb;
+
+    [Header("Jump Buffer")]
+    public float jumpBufferTime = 0.2f;
+    private float jumpBufferTimer;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.freezeRotation = true;
-
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
         readyToJump = true;
     }
 
     // Update is called once per frame
     void Update()
     {
-        grounded = Physics.Raycast(transform.position, Vector3.down, groundLayer * 0.5f + 0.3f, groundLayer);
-        
+        // Improved ground check: raycast from bottom center and four directions
+        Vector3 raycastOrigin = transform.position - Vector3.up * (playerHeight * 0.5f);
+        float checkDist = 0.3f;
+        grounded = Physics.Raycast(raycastOrigin, Vector3.down, checkDist, groundLayer) ||
+                   Physics.Raycast(raycastOrigin + Vector3.forward * 0.2f, Vector3.down, checkDist, groundLayer) ||
+                   Physics.Raycast(raycastOrigin - Vector3.forward * 0.2f, Vector3.down, checkDist, groundLayer) ||
+                   Physics.Raycast(raycastOrigin + Vector3.right * 0.2f, Vector3.down, checkDist, groundLayer) ||
+                   Physics.Raycast(raycastOrigin - Vector3.right * 0.2f, Vector3.down, checkDist, groundLayer);
+
         MyInput();
         SpeedControl();
 
@@ -68,13 +78,21 @@ public class PlayerMovement : MonoBehaviour
         horizontalInput = Input.GetAxis("Horizontal");
         verticalInput = Input.GetAxis("Vertical");
 
-        if (Input.GetKey(jumpKey) && readyToJump && grounded)
+        // Jump buffer system
+        if (Input.GetKeyDown(jumpKey))
+        {
+            jumpBufferTimer = jumpBufferTime;
+        }
+        else
+        {
+            jumpBufferTimer -= Time.deltaTime;
+        }
+
+        if (jumpBufferTimer > 0f && readyToJump && grounded)
         {
             readyToJump = false;
-            
+            jumpBufferTimer = 0f;
             Jump();
-            
-            Invoke(nameof(ResetJump), jumpCooldown);
         }
     }
 
@@ -93,7 +111,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void SpeedControl()
     {
-        Vector3 flatVel = new Vector3(rb.linearVelocity.x, rb.linearVelocity.y, rb.linearVelocity.z);
+        // Only limit XZ velocity, not Y
+        Vector3 flatVel = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
 
         if (flatVel.magnitude > movementSpeed)
         {
@@ -106,6 +125,8 @@ public class PlayerMovement : MonoBehaviour
     {
         rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
         rb.AddForce(transform.up * jumpForce, ForceMode.Impulse);
+        // Prevent immediate re-jumping
+        Invoke(nameof(ResetJump), jumpCooldown);
     }
 
     private void ResetJump()

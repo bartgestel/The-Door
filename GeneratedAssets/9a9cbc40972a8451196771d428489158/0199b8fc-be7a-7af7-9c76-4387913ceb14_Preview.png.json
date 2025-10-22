@@ -1,0 +1,11 @@
+{
+    "asset": "4ea18b2f9075e65fcbfd693129a0da78",
+    "fileName": "0199b8fc-be7a-7af7-9c76-4387913ceb14_Preview.png",
+    "prompt": "Create a Shader Graph for a laser beam effect. The shader should use an unlit base, with emissive glow and transparency. Add additive blending for a glowing effect. Include a scrolling texture feature to simulate movement along the beam. The shader should support a color property to adjust the beam's color and an alpha property to control transparency. Ensure the surface type is set to transparent and the blend mode is additive.",
+    "negativePrompt": "",
+    "model": "575ecf67-4425-4939-97b9-5e138b8ee234",
+    "modelName": "Unity Texture2D",
+    "customSeed": 2142761273,
+    "w3CTraceId": "11546fae0c0c30827bba1f480404f07d",
+    "refinementMode": "Generation"
+}

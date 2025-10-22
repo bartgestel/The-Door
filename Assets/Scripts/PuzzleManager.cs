@@ -1,71 +1,134 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
 public class PuzzleManager : MonoBehaviour
 {
-    public int totalSockets;
-    private int placedCount;
+    // Tile socket puzzle
+    public int totalTileSockets;
+    private int placedTileCount;
 
-    public UnityEvent onPuzzleSolved; // koppel deur/animatie in inspector
-    
+    // Laser puzzle
+    public int totalLaserPuzzles;
+    private int solvedLaserCount;
+    private HashSet<GameObject> solvedLaserReceivers = new HashSet<GameObject>();
+
+    public UnityEvent onPuzzleSolved;
     [Header("Door Reference")]
-    public DoorScript doorScript; // Drag your door here
+    public DoorScript doorScript;
+    [Header("Door Lights")]
+    public GameObject tilePuzzleLight;
+    public GameObject laserPuzzleLight;
+    private bool tileLightLit = false;
+    private bool laserLightLit = false;
+    private Color solvedColor = Color.magenta;
+    private Color unsolvedColor = Color.gray;
 
     void Awake()
     {
-        if (totalSockets == 0)
-            totalSockets = FindObjectsByType<InsertSocket>(FindObjectsSortMode.None).Length;
-            
+        // Auto-count tile sockets if not set
+        if (totalTileSockets == 0)
+            totalTileSockets = FindObjectsByType<InsertSocket>(FindObjectsSortMode.None).Length;
         // Auto-find door if not assigned
         if (doorScript == null)
             doorScript = FindFirstObjectByType<DoorScript>();
     }
 
+    // Tile socket puzzle methods
     public void NotifyPlaced()
     {
-        placedCount++;
-        Debug.Log($"Tile placed: {placedCount}/{totalSockets}");
-        if (placedCount >= totalSockets)
-            Solve();
+        placedTileCount++;
+        Debug.Log($"Tile placed: {placedTileCount}/{totalTileSockets}");
+        if (!tileLightLit && placedTileCount >= totalTileSockets)
+        {
+            if (tilePuzzleLight != null)
+            {
+                var renderer = tilePuzzleLight.GetComponent<Renderer>();
+                if (renderer != null)
+                    renderer.material.color = solvedColor;
+            }
+            tileLightLit = true;
+        }
+        CheckAllPuzzlesSolved();
     }
 
     public void NotifyRemoved()
     {
-        placedCount--;
-        Debug.Log($"Tile removed: {placedCount}/{totalSockets}");
-        if (placedCount < 0) placedCount = 0; // Safety check
+        placedTileCount--;
+        Debug.Log($"Tile removed: {placedTileCount}/{totalTileSockets}");
+        if (placedTileCount < 0) placedTileCount = 0;
     }
 
-    void Solve()
+    // Laser puzzle methods
+    public void NotifyLaserReceiverHit(GameObject receiver)
     {
-        Debug.Log("Puzzle solved!");
-        
-        // Open the door when puzzle is solved
-        if (doorScript != null)
-            doorScript.OpenDoor();
-            
-        onPuzzleSolved?.Invoke();
-        // voeg hier extra logica toe (deur openen, reward spawn, etc.)
+        if (!solvedLaserReceivers.Contains(receiver))
+        {
+            solvedLaserReceivers.Add(receiver);
+            solvedLaserCount++;
+            Debug.Log($"Laser puzzle solved: {solvedLaserCount}/{totalLaserPuzzles}");
+            if (!laserLightLit && solvedLaserCount >= totalLaserPuzzles)
+            {
+                if (laserPuzzleLight != null)
+                {
+                    var renderer = laserPuzzleLight.GetComponent<Renderer>();
+                    if (renderer != null)
+                        renderer.material.color = solvedColor;
+                }
+                laserLightLit = true;
+            }
+            CheckAllPuzzlesSolved();
+        }
     }
 
-    // Optionele reset helper voor testen
+    // Check if both puzzles are solved
+    private void CheckAllPuzzlesSolved()
+    {
+        if (placedTileCount >= totalTileSockets && solvedLaserCount >= totalLaserPuzzles)
+        {
+            Debug.Log("All puzzles solved!");
+            if (doorScript != null)
+                doorScript.OpenDoor();
+            onPuzzleSolved?.Invoke();
+        }
+    }
+
+    // Reset helpers
     public void ResetPuzzle()
     {
-        placedCount = 0;
+        placedTileCount = 0;
+        tileLightLit = false;
+        if (tilePuzzleLight != null)
+        {
+            var renderer = tilePuzzleLight.GetComponent<Renderer>();
+            if (renderer != null)
+                renderer.material.color = unsolvedColor;
+        }
         foreach (var s in FindObjectsByType<InsertSocket>(FindObjectsSortMode.None))
         {
             s.occupied = false;
         }
-        // Vereenvoudigde reset: zet alle tegels los en activeer physics (je wilt meestal spawn points onthouden)
         foreach (var t in FindObjectsByType<PuzzleTile>(FindObjectsSortMode.None))
         {
-            // verplaats ze niet automatisch; je kunt hier spawnlocaties toepassen
             t.isPlaced = false;
             t.transform.SetParent(null);
             var rb = t.GetComponent<Rigidbody>();
             if (rb) rb.isKinematic = false;
             var col = t.GetComponent<Collider>();
             if (col) col.enabled = true;
+        }
+    }
+
+    public void ResetLaserPuzzles()
+    {
+        solvedLaserCount = 0;
+        solvedLaserReceivers.Clear();
+        laserLightLit = false;
+        if (laserPuzzleLight != null)
+        {
+            var renderer = laserPuzzleLight.GetComponent<Renderer>();
+            if (renderer != null)
+                renderer.material.color = unsolvedColor;
         }
     }
 }

@@ -425,6 +425,38 @@ TerrainCollider:
   serializedVersion: 2
   m_TerrainData: {fileID: 15600000, guid: 82e62771002ddb94c802b17d4d7b0ff3, type: 2}
   m_EnableTreeColliders: 1
+--- !u!1 &4961741852518179280
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4183247317534107326}
+  m_Layer: 0
+  m_Name: MirrorPuzzle
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4183247317534107326
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4961741852518179280}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 8240814626744920658}
+  m_Father: {fileID: 7588207065036095406}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4997183803918432692
 GameObject:
   m_ObjectHideFlags: 0
@@ -919,7 +951,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 144798454914541825}
-  - {fileID: 8240814626744920658}
   - {fileID: 6696207010433711107}
   - {fileID: 547816624102983831}
   - {fileID: 6239328445200198698}
@@ -949,6 +980,7 @@ Transform:
   - {fileID: 7699855005760600389}
   - {fileID: 1280350230620516099}
   - {fileID: 1725149438423381846}
+  - {fileID: 4183247317534107326}
   m_Father: {fileID: 434781088088810583}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &57639679522684859
@@ -2900,7 +2932,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 7588207065036095406}
+    m_TransformParent: {fileID: 4183247317534107326}
     m_Modifications:
     - target: {fileID: 2610672458117992886, guid: 043ca31144b91e74c81d3ac8972186c6, type: 3}
       propertyPath: m_Name

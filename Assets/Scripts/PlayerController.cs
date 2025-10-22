@@ -1,5 +1,6 @@
 using UnityEngine;
 
+[RequireComponent(typeof(AudioSource))] // Ensures an AudioSource exists for one-shot effects
 public class PlayerController : MonoBehaviour
 {
     [Header("Movement Settings")]
@@ -21,21 +22,31 @@ public class PlayerController : MonoBehaviour
     
     [Header("References")]
     public Transform orientation; // Use the orientation child instead of camera transform
+
+    [Header("Audio")]
+    public AudioClip jumpStartClip; // This is an audio file (e.g., .wav)
+    public AudioClip jumpLandClip;  // This is an audio file (e.g., .wav)
+    public AudioSource footstepSource; // This is a component (the "CD Player")
     
     // Private variables
     private Rigidbody rb;
     private CapsuleCollider capsuleCollider;
+    private AudioSource effectsSource; // The "CD Player" for one-shot sounds
     
     private Vector2 inputVector;
-    private bool jumpInput;
     private float jumpBufferTimer;
     private float coyoteTimer;
     private bool isGrounded;
     private bool wasGrounded;
+    private bool hasJumpedSinceGrounded;
     
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
+        
+        // This is the "CD Player" for one-shot effects like jumping and landing
+        effectsSource = GetComponent<AudioSource>();
+        effectsSource.playOnAwake = false; // We don't want it to play a sound on start
         
         // Find capsule collider in children since it's on a child object
         capsuleCollider = GetComponentInChildren<CapsuleCollider>();
@@ -64,6 +75,9 @@ public class PlayerController : MonoBehaviour
         CheckGrounded();
         UpdateTimers();
         HandleJump();
+        
+        // Handle footstep sounds in Update
+        HandleFootsteps();
     }
     
     private void FixedUpdate()
@@ -80,7 +94,6 @@ public class PlayerController : MonoBehaviour
         // Get jump input
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            jumpInput = true;
             jumpBufferTimer = jumpBufferTime;
         }
     }
@@ -88,74 +101,101 @@ public class PlayerController : MonoBehaviour
     private void CheckGrounded()
     {
         wasGrounded = isGrounded;
-        
+
         if (capsuleCollider == null)
         {
             isGrounded = false;
             return;
         }
-        
-        // Use the capsule collider's bottom position for ground checking
-        Vector3 capsuleBottom = capsuleCollider.bounds.center - Vector3.up * (capsuleCollider.bounds.extents.y + groundCheckDistance);
-        
-        // Multiple ground checks for better reliability
-        isGrounded = Physics.CheckSphere(capsuleBottom, groundCheckRadius, groundMask);
-        
-        // Additional raycast checks from multiple points
-        Vector3 center = capsuleCollider.bounds.center;
-        Vector3[] checkPoints = {
-            center,
-            center + Vector3.forward * 0.2f,
-            center + Vector3.back * 0.2f,
-            center + Vector3.right * 0.2f,
-            center + Vector3.left * 0.2f
-        };
-        
-        foreach (Vector3 point in checkPoints)
+
+        // Use the player's transform position, not the capsule collider's transform
+        Vector3 capsuleBottom = transform.position - Vector3.up * (capsuleCollider.height * 0.5f);
+    
+        // Primary sphere check
+        isGrounded = Physics.CheckSphere(capsuleBottom - Vector3.up * groundCheckDistance, groundCheckRadius, groundMask);
+
+        // Additional raycast checks from multiple points around the base
+        if (!isGrounded)
         {
-            if (Physics.Raycast(point, Vector3.down, capsuleCollider.bounds.extents.y + groundCheckDistance + 0.1f, groundMask))
+            Vector3[] checkPoints = {
+                capsuleBottom,
+                capsuleBottom + Vector3.forward * (groundCheckRadius * 0.5f),
+                capsuleBottom + Vector3.back * (groundCheckRadius * 0.5f),
+                capsuleBottom + Vector3.right * (groundCheckRadius * 0.5f),
+                capsuleBottom + Vector3.left * (groundCheckRadius * 0.5f)
+            };
+
+            foreach (Vector3 point in checkPoints)
             {
-                isGrounded = true;
-                break;
+                if (Physics.Raycast(point, Vector3.down, groundCheckDistance + 0.1f, groundMask))
+                {
+                    isGrounded = true;
+                    break;
+                }
             }
         }
-        
-        // Reset coyote time when landing
+
+        // Handle state transitions
         if (isGrounded && !wasGrounded)
         {
+            // Just landed
+            
+            // --- AUDIO ---
+            // Play landing sound
+            if (jumpLandClip != null)
+            {
+                // Use PlayOneShot to play the clip on our effects source
+                effectsSource.PlayOneShot(jumpLandClip);
+            }
+            // --- END AUDIO ---
+            
+            hasJumpedSinceGrounded = false;
+            coyoteTimer = 0; // Reset coyote timer when grounded
+        }
+        else if (!isGrounded && wasGrounded)
+        {
+            // Just left the ground
             coyoteTimer = coyoteTime;
         }
-        
-        // Debug output to help troubleshoot
-        Debug.Log($"Grounded: {isGrounded}, CoyoteTimer: {coyoteTimer}, JumpBuffer: {jumpBufferTimer}, CapsuleBottom: {capsuleBottom}");
     }
+
     
     private void UpdateTimers()
     {
         // Update jump buffer
         if (jumpBufferTimer > 0)
             jumpBufferTimer -= Time.deltaTime;
-        
+
         // Update coyote time
-        if (isGrounded)
-            coyoteTimer = coyoteTime;
-        else if (coyoteTimer > 0)
+        if (!isGrounded && coyoteTimer > 0)
             coyoteTimer -= Time.deltaTime;
     }
+
     
     private void HandleJump()
     {
-        // Check if we can jump (buffer time + coyote time)
-        if (jumpBufferTimer > 0 && coyoteTimer > 0)
+        // Jump if grounded and haven't jumped yet
+        if (isGrounded && jumpBufferTimer > 0 && !hasJumpedSinceGrounded)
         {
             Debug.Log("Attempting Jump!");
             PerformJump();
             jumpBufferTimer = 0;
             coyoteTimer = 0;
+            hasJumpedSinceGrounded = true;
         }
-        
-        jumpInput = false;
+        // Jump if in coyote time, not grounded, and haven't jumped yet
+        else if (!isGrounded && coyoteTimer > 0 && jumpBufferTimer > 0 && !hasJumpedSinceGrounded)
+        {
+            Debug.Log("Attempting Coyote Jump!");
+            PerformJump();
+            jumpBufferTimer = 0;
+            coyoteTimer = 0;
+            hasJumpedSinceGrounded = true;
+        }
     }
+
+
+
     
     private void PerformJump()
     {
@@ -168,6 +208,15 @@ public class PlayerController : MonoBehaviour
         Vector3 velocity = rb.linearVelocity;
         velocity.y = jumpVelocity;
         rb.linearVelocity = velocity;
+        
+        // --- AUDIO ---
+        // Play jump sound
+        if (jumpStartClip != null)
+        {
+            // Use PlayOneShot to play the clip on our effects source
+            effectsSource.PlayOneShot(jumpStartClip);
+        }
+        // --- END AUDIO ---
     }
     
     private void HandleMovement()
@@ -181,6 +230,36 @@ public class PlayerController : MonoBehaviour
         else
         {
             AirMovement(moveDirection);
+        }
+    }
+    
+    private void HandleFootsteps()
+    {
+        // This logic is unchanged and correct
+        if (footstepSource == null) return;
+
+        // Get horizontal velocity
+        Vector3 horizontalVelocity = new Vector3(rb.linearVelocity.x, 0, rb.linearVelocity.z);
+
+        // Check if we are on the ground, trying to move, and actually moving
+        bool isMovingOnGround = isGrounded && inputVector.magnitude > 0 && horizontalVelocity.magnitude > 0.1f;
+
+        if (isMovingOnGround)
+        {
+            // If moving and sound isn't playing, play it
+            // Make sure your footstepSource has "Loop" checked in the Inspector
+            if (!footstepSource.isPlaying)
+            {
+                footstepSource.Play();
+            }
+        }
+        else
+        {
+            // If not moving on ground and sound is playing, stop it
+            if (footstepSource.isPlaying)
+            {
+                footstepSource.Stop();
+            }
         }
     }
     
@@ -256,9 +335,9 @@ public class PlayerController : MonoBehaviour
         if (capsuleCollider != null)
         {
             Gizmos.color = isGrounded ? Color.green : Color.red;
-            Vector3 spherePosition = transform.position - Vector3.up * (capsuleCollider.height * 0.5f - capsuleCollider.radius);
+            Vector3 capsuleBottom = transform.position - Vector3.up * (capsuleCollider.height * 0.5f);
+            Vector3 spherePosition = capsuleBottom - Vector3.up * groundCheckDistance;
             Gizmos.DrawWireSphere(spherePosition, groundCheckRadius);
-            Gizmos.DrawWireSphere(spherePosition - Vector3.up * groundCheckDistance, groundCheckRadius);
         }
     }
 }

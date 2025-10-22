@@ -1,6 +1,8 @@
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
 
-public class PuzzleTile : MonoBehaviour
+public class PuzzleTile : MonoBehaviour, IPointerEnterHandler
 {
     public int tileId;
 
@@ -35,6 +37,11 @@ public class PuzzleTile : MonoBehaviour
         transform.position = snapPosition;
         transform.rotation = snapPoint.rotation;
         transform.SetParent(snapPoint);
+    }
+
+    public void OnPointerEnter(PointerEventData eventData)
+    {
+        Debug.Log("OnPointerEnter");
     }
 
     // Optioneel: helper om tile weer actief te maken bij reset

@@ -23,6 +23,20 @@ public class PlayerPickup : MonoBehaviour
 
     void Update()
     {
+        // Show tooltip if looking at a pickupable tile
+        if (playerCamera != null && heldTile == null)
+        {
+            Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, pickupRange))
+            {
+                PuzzleTile tile = hit.collider.GetComponent<PuzzleTile>();
+                if (tile != null && !tile.isPlaced)
+                {
+                    ShowTooltip("Press E to pick up tile");
+                }
+            }
+        }
         if (Input.GetKeyDown(KeyCode.E)) // press E to pick up / drop
         {
             if (heldTile == null)
@@ -56,6 +70,12 @@ public class PlayerPickup : MonoBehaviour
                 Time.deltaTime * 10f
             );
         }
+    }
+    
+    void ShowTooltip(string message)
+    {
+        // Implement your tooltip display logic here
+        Debug.Log($"Tooltip: {message}");
     }
 
     void TryPickup()

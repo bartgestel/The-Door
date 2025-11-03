@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class PlayerPickup : MonoBehaviour
@@ -7,7 +8,10 @@ public class PlayerPickup : MonoBehaviour
     public float throwForce = 5f;        // optional if you want to throw
     private PuzzleTile heldTile;
     private Camera playerCamera;
+    private MirrorScript mirrorScript;
     public Quaternion holdRotationOffset = Quaternion.Euler(0, 180, 0); // Adjust as needed
+    public GameObject toolTipObject;
+    public TextMeshProUGUI toolTipText;
 
 
     void Start()
@@ -19,10 +23,37 @@ public class PlayerPickup : MonoBehaviour
         
         if (playerCamera == null)
             Debug.LogError("No camera found! PlayerPickup needs a camera to work.");
+
+        if (toolTipObject != null)
+        {
+            toolTipText = toolTipObject.GetComponent<TextMeshProUGUI>();
+        }
     }
 
     void Update()
     {
+        // Show tooltip if looking at a pickupable tile
+        if (playerCamera != null && heldTile == null)
+        {
+            Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2f, Screen.height / 2f, 0f));
+            RaycastHit hit;
+            if (Physics.Raycast(ray, out hit, pickupRange))
+            {
+                PuzzleTile tile = hit.collider.GetComponent<PuzzleTile>();
+                MirrorScript mirror = hit.collider.GetComponent<MirrorScript>();
+                if (tile != null && !tile.isPlaced && heldTile == null)
+                {
+                    ShowTooltip("Press E to pick up tile");
+                }
+                else if (mirror != null)
+                {
+                    ShowTooltip("Press E to grab mirror");
+                }else if(mirrorScript==null && tile==null)
+                {
+                    ShowTooltip("");
+                }
+            }
+        }
         if (Input.GetKeyDown(KeyCode.E)) // press E to pick up / drop
         {
             if (heldTile == null)
@@ -56,6 +87,13 @@ public class PlayerPickup : MonoBehaviour
                 Time.deltaTime * 10f
             );
         }
+    }
+    
+    void ShowTooltip(string message)
+    {
+        // Implement your tooltip display logic here
+        Debug.Log($"Tooltip: {message}");
+        toolTipText.text = message;
     }
 
     void TryPickup()

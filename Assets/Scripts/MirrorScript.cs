@@ -8,6 +8,7 @@ public class MirrorScript : MonoBehaviour
 
     void Update()
     {
+        
         if (!isGrabbed)
         {
             if (Input.GetKeyDown(KeyCode.E))

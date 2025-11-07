@@ -156,6 +156,6 @@ public class EndGameScript : MonoBehaviour
         // Optional: keep panel active so the player can see credits, or provide buttons on the panel to quit/restart.
         // For now, we'll simply log and leave the panel visible. If the game was paused, we keep it paused so timeScale stays 0.
         Debug.Log("EndGameScript: Credits finished.");
-        
+        UnityEngine.SceneManagement.SceneManager.LoadScene("Menu_Screen");
     }
 }

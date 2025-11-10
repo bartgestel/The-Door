@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 public class PuzzleTile : MonoBehaviour, IPointerEnterHandler
@@ -8,27 +7,27 @@ public class PuzzleTile : MonoBehaviour, IPointerEnterHandler
 
     [HideInInspector] public bool isPlaced;
 
-    private Rigidbody rb;
-    private Collider col;
+    private Rigidbody _rb;
+    private Collider _col;
     
     void Awake()
     {
-        rb = GetComponent<Rigidbody>();
-        col = GetComponent<Collider>();
+        _rb = GetComponent<Rigidbody>();
+        _col = GetComponent<Collider>();
         
-        if (rb == null)
+        if (_rb == null)
             Debug.LogError($"PuzzleTile {gameObject.name} is missing a Rigidbody component!");
-        if (col == null)
+        if (_col == null)
             Debug.LogError($"PuzzleTile {gameObject.name} is missing a Collider component!");
     }
     
     public void SnapTo(Transform snapPoint, float heightOffset = 0f)
     {
-        rb.linearVelocity = Vector3.zero;
-        rb.angularVelocity = Vector3.zero;
-        rb.isKinematic = true;
+        _rb.linearVelocity = Vector3.zero;
+        _rb.angularVelocity = Vector3.zero;
+        _rb.isKinematic = true;
 
-        if (col != null) col.enabled = false;
+        if (_col != null) _col.enabled = false;
 
         // Position the tile above the snap point by the specified offset
         Vector3 snapPosition = snapPoint.position + Vector3.up * heightOffset;
@@ -50,7 +49,7 @@ public class PuzzleTile : MonoBehaviour, IPointerEnterHandler
         isPlaced = false;
         transform.SetParent(null);
         transform.position = worldPosition;
-        if (rb != null) rb.isKinematic = false;
-        if (col != null) col.enabled = true;
+        if (_rb != null) _rb.isKinematic = false;
+        if (_col != null) _col.enabled = true;
     }
 }

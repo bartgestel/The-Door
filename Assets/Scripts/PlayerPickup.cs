@@ -92,7 +92,6 @@ public class PlayerPickup : MonoBehaviour
     void ShowTooltip(string message)
     {
         // Implement your tooltip display logic here
-        Debug.Log($"Tooltip: {message}");
         toolTipText.text = message;
     }
 
@@ -109,14 +108,12 @@ public class PlayerPickup : MonoBehaviour
         
         if (Physics.Raycast(ray, out hit, pickupRange))
         {
-            Debug.Log($"Hit object: {hit.collider.name}");
             PuzzleTile tile = hit.collider.GetComponent<PuzzleTile>();
             if (tile != null && !tile.isPlaced)
             {
                 // Prevent picking up if tile is parented to a socket snapPoint (i.e., visually in a socket)
                 if (tile.transform.parent != null && tile.transform.parent.GetComponent<InsertSocket>() != null)
                 {
-                    Debug.Log("Tile is in a socket, use E on the socket to pick it up.");
                     return;
                 }
                 // Notify all sockets to clear their reference to this tile
@@ -124,7 +121,6 @@ public class PlayerPickup : MonoBehaviour
                 {
                     socket.OnTilePickedUp(tile);
                 }
-                Debug.Log($"Picking up tile with ID: {tile.tileId}");
                 heldTile = tile;
                 Rigidbody rb = heldTile.GetComponent<Rigidbody>();
                 if (rb != null)

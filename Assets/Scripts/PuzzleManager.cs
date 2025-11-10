@@ -22,7 +22,6 @@ public class PuzzleManager : MonoBehaviour
     private bool tileLightLit = false;
     private bool laserLightLit = false;
     private Color solvedColor = Color.magenta;
-    private Color unsolvedColor = Color.gray;
 
     void Awake()
     {
@@ -101,8 +100,6 @@ public class PuzzleManager : MonoBehaviour
         if (tilePuzzleLight != null)
         {
             var renderer = tilePuzzleLight.GetComponent<Renderer>();
-            if (renderer != null)
-                renderer.material.color = unsolvedColor;
         }
         foreach (var s in FindObjectsByType<InsertSocket>(FindObjectsSortMode.None))
         {
@@ -127,8 +124,6 @@ public class PuzzleManager : MonoBehaviour
         if (laserPuzzleLight != null)
         {
             var renderer = laserPuzzleLight.GetComponent<Renderer>();
-            if (renderer != null)
-                renderer.material.color = unsolvedColor;
         }
     }
 }

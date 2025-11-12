@@ -47,7 +47,7 @@ public class PlayerPickup : MonoBehaviour
                 }
                 else if (mirror != null)
                 {
-                    ShowTooltip("Press E to grab mirror");
+                    ShowTooltip("Hold E to grab mirror");
                 }else if(mirrorScript==null && tile==null)
                 {
                     ShowTooltip("");

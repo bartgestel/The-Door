@@ -5,6 +5,20 @@ using TMPro;
 
 public class EndGameScript : MonoBehaviour
 {
+    [Header("Pre-Credits UI")]
+    [Tooltip("Optional panel to show before the credits roll (e.g., 'Congratulations!', 'You Won!', etc.)")]
+    public GameObject preCreditsPanel;
+
+    [Tooltip("How long (seconds, unscaled) to display the pre-credits panel before showing credits.")]
+    public float preCreditsDisplayDuration = 3f;
+
+    [Tooltip("Optional text component in the pre-credits panel to customize the message.")]
+    public TextMeshProUGUI preCreditsText;
+
+    [Tooltip("If provided, this message will be set to preCreditsText on start.")]
+    [TextArea]
+    public string preCreditsMessage = "Congratulations!\nYou've completed the game!";
+
     [Header("End Game UI")]
     [Tooltip("Assign the panel (Canvas or GameObject) that contains the credits UI. It will be enabled when the player triggers the end.")]
     public GameObject endGamePanel;
@@ -30,9 +44,19 @@ public class EndGameScript : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        // Hide the pre-credits panel at start
+        if (preCreditsPanel != null)
+            preCreditsPanel.SetActive(false);
+
         // If the panel is assigned, ensure it's hidden at start
         if (endGamePanel != null)
             endGamePanel.SetActive(false);
+
+        // Set pre-credits message if provided
+        if (preCreditsText != null && !string.IsNullOrEmpty(preCreditsMessage))
+        {
+            preCreditsText.text = preCreditsMessage;
+        }
 
         // If there are lines provided, join them into the text component (if assigned)
         if (creditsText != null && creditsLines != null && creditsLines.Length > 0)
@@ -91,20 +115,89 @@ public class EndGameScript : MonoBehaviour
     void StartEndSequence()
     {
         Debug.Log("EndGameScript: Player triggered end game sequence.");
-        // Show panel and start credits coroutine
+        
+        // Unlock and show cursor so the player can interact with UI
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        if (pauseGame)
+            Time.timeScale = 0f; // freeze the game's physics and updates (UI still can animate via unscaled time)
+
+        // Start the full end game sequence (pre-credits then credits)
+        StartCoroutine(PlayEndGameSequence());
+    }
+
+    IEnumerator PlayEndGameSequence()
+    {
+        // Make sure credits panel is hidden initially
         if (endGamePanel != null)
         {
-            // Ensure panel active so UI elements can be measured/animated
+            endGamePanel.SetActive(false);
+        }
+
+        // Step 1: Show pre-credits panel if assigned
+        if (preCreditsPanel != null)
+        {
+            Debug.Log("EndGameScript: Showing pre-credits panel.");
+            
+            // Ensure proper Canvas rendering order
+            Canvas preCanvas = preCreditsPanel.GetComponent<Canvas>();
+            Canvas creditsCanvas = endGamePanel != null ? endGamePanel.GetComponent<Canvas>() : null;
+            
+            if (preCanvas != null)
+            {
+                // Make sure pre-credits canvas renders on top
+                preCanvas.overrideSorting = true;
+                preCanvas.sortingOrder = 1000;
+                Debug.Log($"EndGameScript: Pre-credits Canvas sort order set to {preCanvas.sortingOrder}");
+                
+                if (creditsCanvas != null)
+                {
+                    creditsCanvas.overrideSorting = true;
+                    creditsCanvas.sortingOrder = 500;
+                    Debug.Log($"EndGameScript: Credits Canvas sort order set to {creditsCanvas.sortingOrder}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("EndGameScript: Pre-credits panel doesn't have a Canvas component! It should be a Canvas object.");
+            }
+            
+            preCreditsPanel.SetActive(true);
+            
+            // Verify it's actually active and check for child objects
+            if (preCreditsPanel.activeSelf)
+            {
+                Debug.Log("EndGameScript: Pre-credits panel is now active and visible.");
+                Debug.Log($"EndGameScript: Pre-credits panel has {preCreditsPanel.transform.childCount} child objects.");
+                
+                // Check if children are active
+                for (int i = 0; i < preCreditsPanel.transform.childCount; i++)
+                {
+                    Transform child = preCreditsPanel.transform.GetChild(i);
+                    Debug.Log($"EndGameScript: Child '{child.name}' is active: {child.gameObject.activeSelf}");
+                }
+            }
+            else
+            {
+                Debug.LogWarning("EndGameScript: Pre-credits panel failed to activate!");
+            }
+            
+            yield return new WaitForSecondsRealtime(preCreditsDisplayDuration);
+            preCreditsPanel.SetActive(false);
+            Debug.Log("EndGameScript: Pre-credits panel hidden.");
+        }
+        else
+        {
+            Debug.Log("EndGameScript: No pre-credits panel assigned, skipping to credits.");
+        }
+
+        // Step 2: Show credits panel and play credits animation
+        if (endGamePanel != null)
+        {
+            Debug.Log("EndGameScript: Showing credits panel.");
             endGamePanel.SetActive(true);
-
-            // Unlock and show cursor so the player can interact with UI
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-
-            if (pauseGame)
-                Time.timeScale = 0f; // freeze the game's physics and updates (UI still can animate via unscaled time)
-
-            StartCoroutine(PlayCreditsUnscaled());
+            yield return StartCoroutine(PlayCreditsUnscaled());
         }
         else
         {

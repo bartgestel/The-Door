@@ -74,7 +74,6 @@ public class PlayerController : MonoBehaviour
         HandleInput();
         CheckGrounded();
         UpdateTimers();
-        HandleJump();
         
         // Handle footstep sounds in Update
         HandleFootsteps();

@@ -2363,6 +2363,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 434781088088810583, guid: 55e009b2da427874fae0f6310f201927, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1599217570}
     - targetCorrespondingSourceObject: {fileID: 7588207065036095406, guid: 55e009b2da427874fae0f6310f201927, type: 3}
       insertIndex: -1
       addedObject: {fileID: 414027536}
@@ -2404,6 +2407,11 @@ PrefabInstance:
 --- !u!4 &1384410722 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6556933838402942001, guid: 55e009b2da427874fae0f6310f201927, type: 3}
+  m_PrefabInstance: {fileID: 1384410721}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &1384410723 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 434781088088810583, guid: 55e009b2da427874fae0f6310f201927, type: 3}
   m_PrefabInstance: {fileID: 1384410721}
   m_PrefabAsset: {fileID: 0}
 --- !u!1 &1417567486
@@ -2821,37 +2829,31 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: 'The End
+  m_text: 'You can wake up now
+
+
+
+
+
+
+
+
+
+    The End
 
 
     Lead Designer
 
-    Coco van Glabbeek
+    Coco
+    van Glabbeek
 
 
     Lead Developer
 
-    Bart
-    van Gestel
+    Bart van Gestel
 
 
     Third-Party Assets
-
-
-    Low Poly Road Pack
-
-    Fast Mesh
-
-
-    LowPoly
-    Water
-
-    Ebru Dogan
-
-
-    Low Poly City Cars Pack
-
-    Poly Ronin
 
 
     Low
@@ -2860,7 +2862,24 @@ MonoBehaviour:
     Fast Mesh
 
 
-    Low-Poly Simple Nature Pack
+    LowPoly Water
+
+    Ebru Dogan
+
+
+    Low Poly
+    City Cars Pack
+
+    Poly Ronin
+
+
+    Low Poly Road Pack
+
+    Fast Mesh
+
+
+    Low-Poly
+    Simple Nature Pack
 
     JustCreate
 
@@ -3241,7 +3260,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 0}
+    m_TransformParent: {fileID: 1384410723}
     m_Modifications:
     - target: {fileID: 842710201323287137, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalPosition.y
@@ -3325,15 +3344,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 7.11
+      value: 36.059566
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.15
+      value: -2.1599984
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -43.06
+      value: -56.706543
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalRotation.w
@@ -3341,15 +3360,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -3452,6 +3471,11 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
+--- !u!4 &1599217570 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7017500335796471956, guid: 9c8be93c1d00a4c4d9e6660b4d861509, type: 3}
+  m_PrefabInstance: {fileID: 1599217569}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1644928213
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4542,4 +4566,3 @@ SceneRoots:
   - {fileID: 1126498215}
   - {fileID: 1384410721}
   - {fileID: 941085146}
-  - {fileID: 1599217569}
